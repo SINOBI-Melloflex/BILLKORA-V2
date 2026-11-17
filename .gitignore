@@ -1,0 +1,9 @@
+.profile/
+backup_*/
+public_backup_*/
+data/
+logo/
+node_modules/
+*.txt
+*.log
+Thumbs.db

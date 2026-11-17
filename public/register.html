@@ -1,0 +1,24 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BillKora - Register</title><link rel="stylesheet" href="style.css"></head><body>
+<div id="nav" data-on="reg"></div>
+<div class="reg"><div class="l"><h1>Get Your<br>Internet Connection</h1><h2>Register as a <b>New Customer</b></h2>
+<p>Submit your request to get a high-speed, reliable internet connection from BillKora. Our team will review your information and contact you shortly.</p>
+<img src="images/router.jpg" alt="Router"></div>
+<div class="fc"><div class="hd"><span class="ic"><i data-i="user"></i></span><div><h2>New Customer Registration</h2><p class="muted">Request for a New Internet Connection</p></div></div>
+<div class="st"><div class="on" id="t1"><div class="c">1</div>Personal Info</div><div class="ln on" id="l1"></div><div id="t2"><div class="c">2</div>Connection Details</div><div class="ln" id="l2"></div><div id="t3"><div class="c">3</div>Review &amp; Submit</div></div>
+<form id="fm"><div class="g">
+<div><label>Full Name <b>*</b></label><div class="in"><i data-i="user"></i><input id="n" placeholder="Enter your full name" required></div></div>
+<div><label>National ID (NID) / ID No.</label><div class="in"><i data-i="idc"></i><input id="nid" placeholder="Enter NID or any valid ID"></div></div>
+<div><label>Phone Number <b>*</b></label><div class="in"><i data-i="phone"></i><input id="ph" placeholder="Enter your mobile number" required></div></div>
+<div><label>Address <b>*</b></label><div class="in"><i data-i="pin"></i><input id="ad" placeholder="House, Road, Area, City" required></div></div>
+<div><label>Email Address</label><div class="in"><i data-i="mail"></i><input id="em" type="email" placeholder="Enter your email (optional)"></div></div>
+<div><label>Preferred Package <b>*</b></label><div class="in"><i data-i="wifi"></i><select id="pk" required><option value="">Select an internet package</option></select></div></div></div>
+<label>Additional Note (Optional)</label><textarea id="nt" placeholder="Any special request or message for our team..."></textarea>
+<div class="ft"><label style="font-weight:400;margin:0"><input type="checkbox" id="ag" required>I agree to the <a href="#" onclick="return terms('Terms &amp; Conditions')">Terms &amp; Conditions</a> and <a href="#" onclick="return terms('Privacy Policy')">Privacy Policy</a>.</label><button class="sub" type="submit"><i data-i="send"></i> Submit Request</button></div></form>
+<div id="ok"><h2>Request Submitted!</h2><p class="muted">Our team will review your information and contact you shortly.</p></div></div></div>
+<script src="app.js"></script>
+<script>
+api('public').then(function(p){var s=$('pk'),q=(location.search.match(/p=([^&]+)/)||[])[1];p.packages.forEach(function(x){var o=document.createElement('option');o.value=x.name;o.textContent=x.name+' - '+money(x.price)+'/mo';if(x.id===q)o.selected=true;s.appendChild(o)})});
+$('fm').onsubmit=function(e){e.preventDefault();
+var d={name:$('n').value,nid:$('nid').value,phone:$('ph').value,address:$('ad').value,email:$('em').value,package:$('pk').value,note:$('nt').value};
+api('register','POST',d).then(function(){$('fm').style.display='none';$('ok').style.display='block';['t2','t3','l2'].forEach(function(i){$(i).classList.add('on')})}).catch(function(er){toast(er.message,1)})};
+</script></body></html>
