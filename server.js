@@ -34,7 +34,7 @@ function newInvoice(c,month,amount){month=month||mkey(0);const p=db.packages.fin
 function pay(i,method){if(i.status==='paid')return null;i.status='paid';i.paidOn=now();const p={id:uid('pm'),no:num('PAY-'),customerId:i.customerId,invoiceId:i.id,amount:i.amount,method:method||'Cash',date:now()};db.payments.push(p);const c=db.customers.find(x=>x.id===i.customerId);if(c&&c.status==='suspended'&&!db.invoices.some(x=>x.customerId===c.id&&x.status==='due'))c.status='active';return p}
 function sess(req){const m=/(?:^|;\s*)bk=([a-f0-9]+)/.exec(req.headers.cookie||'');const s=m&&S[m[1]];return s&&s.exp>Date.now()?s:null}
 function J(res,o,c){res.statusCode=c||200;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(o))}
-const F={customers:['name','phone','email','address','nid','packageId','status','username'],packages:['name','desc'],devices:['customerId','type','ip','mac','status'],announcements:['title','text']};
+const F={customers:['name','phone','email','address','nid','packageId','status','username'],packages:['name','desc','profile','speed'],devices:['customerId','type','ip','mac','status'],announcements:['title','text']};
 const NUM={packages:['speed','price'],customers:['usage']};
 const PFX={customers:'c',packages:'p',devices:'d',announcements:'a'};
 const has=k=>Object.prototype.hasOwnProperty.call(F,k);
@@ -62,9 +62,10 @@ function route(req,res,u,b){
  if(q[1]==='admin'){
   if(s.role!=='admin')return bad('Forbidden',403);
   const col=q[2],id=q[3],act=q[4];
+  if(require('./extra.js')(col,id,act,M,b,ok,bad,db,save,uid,now,str))return;
   if(has(col)){
    const arr=db[col];
-   if(M==='GET')return ok(col==='customers'?arr.map(pub):arr);
+   if(wrap(col,id,M,b,ok,db,str,takenUser,nextCid,uid,H,now,newInvoice,save))return;if(M==='GET')return ok(col==='customers'?arr.map(pub):arr);
    if(M==='POST'){
     const o=pick(col,b,{id:uid(PFX[col])});
     if(col==='customers'){
@@ -181,3 +182,28 @@ http.createServer((req,res)=>{
  req.on('end',()=>{let body={};try{body=b?JSON.parse(b):{}}catch(e){}
   try{route(req,res,u,body)}catch(e){console.error(e);J(res,{error:'Server error'},500)}});
 }).listen(4050,'127.0.0.1');
+
+
+function wrap(col,id,M,b,ok,db,str,takenUser,nextCid,uid,H,now,newInvoice,save){
+  if(col==='customers'&&id==='import'&&M==='POST'){
+   const rows=Array.isArray(b.rows)?b.rows.slice(0,1000):[],upd=b.mode==='update',mk=!!b.invoice;let added=0,updated=0;const skipped=[];
+   rows.forEach(r=>{
+    r=r||{};const un0=str(r.username).toLowerCase(),name=str(r.name)||str(r.username),phone=str(r.phone),who=str(r.username)||name;
+    if(!name){skipped.push({who:'(blank)',why:'No name or username'});return}
+    const pk=db.packages.find(p=>p.id===r.packageId),st=['active','suspended','disconnected'].includes(r.status)?r.status:'';
+    const ex=un0?db.customers.find(c=>String(c.username).toLowerCase()===un0):null;
+    if(ex){
+     if(!upd){skipped.push({who:who,why:'Username already exists'});return}
+     ex.name=name;['phone','email','address','nid'].forEach(k=>{if(str(r[k]))ex[k]=str(r[k])});
+     if(pk)ex.packageId=pk.id;if(st)ex.status=st;if(str(r.pass))ex.pass=H(str(r.pass));updated++;return;
+    }
+    const cid=nextCid(),un=un0||cid.toLowerCase();
+    if(takenUser(un)){skipped.push({who:who,why:'Username already used'});return}
+    const pw=str(r.pass)||phone.replace(/\D/g,'')||'123456';
+    const c={id:uid('c'),cid:cid,name:name,phone:phone,email:str(r.email),address:str(r.address),nid:str(r.nid),packageId:pk?pk.id:(db.packages[0]&&db.packages[0].id),status:st||'active',username:un,pass:H(pw),joined:now(),usage:0};
+    db.customers.push(c);added++;if(mk)newInvoice(c);
+   });
+   save();ok({ok:true,added:added,updated:updated,skipped:skipped});return true;
+  }
+  return false;
+}

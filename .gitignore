@@ -8,3 +8,10 @@ node_modules/
 *.log
 Thumbs.db
 BILLKORA-V2/
+backup-*/
+*.bak
+*.bak-*
+srv-out.txt
+srv-err.txt
+audit*-result.txt
+.env

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BillKora - Admin</title><link rel="stylesheet" href="style.css"></head><body>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BillKora - Admin</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="erp.css"></head><body>
 <div class="app"><div class="side"><div class="logo"><img src="logo.png" alt="" style="height:40px;border-radius:8px"><div>BillKora<small>ISP Admin Panel</small></div></div>
 <a data-v="dashboard" href="#dashboard"><i data-i="home"></i>Dashboard</a><a data-v="customers" href="#customers"><i data-i="users"></i>Customers</a><a data-v="requests" href="#requests"><i data-i="mail"></i>Requests</a><a data-v="packages" href="#packages"><i data-i="box"></i>Packages</a><a data-v="billing" href="#billing"><i data-i="file"></i>Billing &amp; Invoices</a><a data-v="payments" href="#payments"><i data-i="card"></i>Payments</a><a data-v="network" href="#network"><i data-i="server"></i>Network/Devices</a><a data-v="support" href="#support"><i data-i="hp"></i>Support</a><a data-v="reports" href="#reports"><i data-i="chart"></i>Reports</a><a data-v="settings" href="#settings"><i data-i="gear"></i>Settings</a>
 <a href="#" onclick="logout();return false" style="margin-top:30px"><i data-i="out"></i>Logout</a></div>
@@ -81,4 +81,5 @@ V.settings=function(){return Promise.all([api('admin/settings'),api('admin/annou
  sub('f1','PUT','admin/settings','Settings saved');sub('f2','POST','admin/password','Password changed')})};
 function editA(){form('New Announcement',[{k:'title',l:'Title',r:1},{k:'text',l:'Message',t:'textarea'}],{},function(d){return api('admin/announcements','POST',d).then(done('Posted'))},'Post')}
 function delA(id){sure('Delete this announcement?',function(){A('admin/announcements/'+id,'DELETE',null,'Deleted')})}
-</script></body></html>
+</script><script src="xlsx.full.min.js"></script><script src="migration.js"></script><script src="premium.js"></script>
+<script src="erp.js"></script><script src="unique.js"></script><script src="hub.js"></script><script src="support.js"></script><script src="wizard.js"></script><script src="demo.js"></script></body></html>
