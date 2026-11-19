@@ -5,15 +5,18 @@ const FIELDS={
  staff:['name','role','phone','email','salary','joined','status','note'],
  inventory:['item','kind','serial','mac','qty','location','status','assignedTo','note'],
  jobs:['title','customerId','type','tech','date','status','note'],
- netdevices:['name','kind','method','ip','port','user','pass','status','note'],
+ netdevices:['name','kind','method','ip','port','user','pass','status','note','community'],
  cmeta:['customerId','zone','sub','type']
 };
 const REQ={zones:'name',staff:'name',inventory:'item',jobs:'title',netdevices:'name'};
-const PORT={api:8728,snmp:161,telnet:23};
+const PORT={api:8728,snmp:161,telnet:23,ssh:22};
 function clean(v){return String(v==null?'':v).trim().slice(0,300)}
 function pickF(col,b,o){FIELDS[col].forEach(k=>{if(b[k]!==undefined)o[k]=clean(b[k])});return o}
 module.exports=function(col,id,act,M,b,ok,bad,db,save,uid,now,str){
  b=b||{};
+ if(require('./c360.js')(col,id,act,M,b,ok,bad,db,save,uid,now,str))return true;
+ if(require('./mw.js')(col,id,act,M,b,ok,bad,db,save,uid,now,str))return true;
+ if(require('./upd.js')(col,id,act,M,b,ok,bad,db,save,uid,now,str))return true;
  if(col==='tkt'||col==='tkt2'){
   if(M!=='POST')return false;
   const c=db.customers.find(x=>x.id===String(b.customerId||''));

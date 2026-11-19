@@ -12,7 +12,7 @@ const num=p=>p+(db.seq=(db.seq||1000)+1);
 const S={};
 let db;
 fs.mkdirSync(dd,{recursive:true});
-function save(){fs.writeFileSync(dbf,JSON.stringify(db,null,1))}
+function save(){const j=JSON.stringify(db,null,1),t=dbf+'.tmp';try{fs.writeFileSync(t,j);fs.renameSync(t,dbf)}catch(e){fs.writeFileSync(dbf,j)}}
 function seed(){
  const inv=(mo,st)=>{const i={id:uid('i'),no:num('INV-'),customerId:'c1',month:mo,amount:1000,status:st,issued:mo+'-01T00:00:00.000Z',due:mo+'-28'};db.invoices.push(i);if(st==='paid'){i.paidOn=mo+'-10T00:00:00.000Z';db.payments.push({id:uid('pm'),no:num('PAY-'),customerId:'c1',invoiceId:i.id,amount:1000,method:'bKash',date:mo+'-10T00:00:00.000Z'})}};
  db={settings:{company:'BillKora',phone:'01700-000000',email:'support@billkora.com',address:'Dhaka, Bangladesh',admin:{user:'admin',pass:H('admin')}},
@@ -24,7 +24,7 @@ function seed(){
   announcements:[{id:'a1',title:'Scheduled Maintenance',text:'Our network will be under maintenance on Nov 20, 2026 (12:00 AM - 4:00 AM).',date:now()}]};
  inv(mkey(2),'paid');inv(mkey(1),'paid');inv(mkey(0),'due');
 }
-try{db=JSON.parse(fs.readFileSync(dbf,'utf8'))}catch(e){seed();try{JSON.parse(fs.readFileSync(path.join(dd,'requests.json'),'utf8')).forEach(r=>db.requests.push(Object.assign({id:uid('r'),status:'pending'},r)))}catch(e2){}save()}
+try{db=JSON.parse(fs.readFileSync(dbf,'utf8'))}catch(e){try{if(fs.existsSync(dbf)&&fs.statSync(dbf).size>2)fs.copyFileSync(dbf,dbf+'.corrupt-'+Date.now())}catch(x){}seed();try{JSON.parse(fs.readFileSync(path.join(dd,'requests.json'),'utf8')).forEach(r=>db.requests.push(Object.assign({id:uid('r'),status:'pending'},r)))}catch(e2){}save()}
 const pub=c=>{const o=Object.assign({},c);delete o.pass;return o};
 const withName=o=>{const c=db.customers.find(x=>x.id===o.customerId);return Object.assign({},o,{customer:c?c.name:'(deleted)',cid:c?c.cid:''})};
 const nextCid=()=>'BK-'+(Math.max(10457,...db.customers.map(c=>parseInt(String(c.cid).slice(3))||0))+1);
@@ -34,7 +34,7 @@ function newInvoice(c,month,amount){month=month||mkey(0);const p=db.packages.fin
 function pay(i,method){if(i.status==='paid')return null;i.status='paid';i.paidOn=now();const p={id:uid('pm'),no:num('PAY-'),customerId:i.customerId,invoiceId:i.id,amount:i.amount,method:method||'Cash',date:now()};db.payments.push(p);const c=db.customers.find(x=>x.id===i.customerId);if(c&&c.status==='suspended'&&!db.invoices.some(x=>x.customerId===c.id&&x.status==='due'))c.status='active';return p}
 function sess(req){const m=/(?:^|;\s*)bk=([a-f0-9]+)/.exec(req.headers.cookie||'');const s=m&&S[m[1]];return s&&s.exp>Date.now()?s:null}
 function J(res,o,c){res.statusCode=c||200;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(o))}
-const F={customers:['name','phone','email','address','nid','packageId','status','username'],packages:['name','desc','profile','speed'],devices:['customerId','type','ip','mac','status'],announcements:['title','text']};
+const F={customers:['name','phone','email','address','nid','packageId','status','username','pppUser','pppPass','mac','ip','expiry','rProfile','rPool'],packages:['name','desc','profile','speed','pool'],devices:['customerId','type','ip','mac','status'],announcements:['title','text']};
 const NUM={packages:['speed','price'],customers:['usage']};
 const PFX={customers:'c',packages:'p',devices:'d',announcements:'a'};
 const has=k=>Object.prototype.hasOwnProperty.call(F,k);
@@ -70,6 +70,7 @@ function route(req,res,u,b){
     const o=pick(col,b,{id:uid(PFX[col])});
     if(col==='customers'){
      if(!o.name||!o.phone)return bad('Name and phone are required');
+     if(!require('./mt.js').dev(db))return bad('Add a MikroTik router first (Migration & Network Devices). Customers are created on a router.');
      o.cid=nextCid();o.username=(o.username||o.cid).toLowerCase();
      if(takenUser(o.username))return bad('Username already used');
      const pw=b.pass||o.phone.replace(/\D/g,'')||'123456';o.pass=H(pw);
@@ -107,7 +108,7 @@ function route(req,res,u,b){
   }
   if(col==='invoices'){
    if(M==='GET')return ok(db.invoices.map(withName).sort(byD));
-   if(M==='POST'&&id==='generate'){let n=0;db.customers.filter(c=>c.status!=='disconnected').forEach(c=>{if(newInvoice(c))n++});save();return ok({ok:true,created:n})}
+   if(M==='POST'&&id==='generate'){let n=0;db.customers.filter(c=>c.status!=='disconnected'&&c.status!=='paused').forEach(c=>{if(newInvoice(c))n++});save();return ok({ok:true,created:n})}
    if(M==='POST'){const c=db.customers.find(x=>x.id===b.customerId);if(!c)return bad('Choose a customer');let mo=str(b.month);if(!/^\d{4}-\d{2}$/.test(mo))mo=mkey(0);const amt=Number(b.amount);const i=newInvoice(c,mo,amt>0?amt:undefined);if(!i)return bad('An invoice for that month already exists');save();return ok()}
    if(M==='DELETE'){db.invoices=db.invoices.filter(i=>i.id!==id);db.payments=db.payments.filter(p=>p.invoiceId!==id);save();return ok()}
   }
@@ -173,7 +174,7 @@ function serve(u,res){
  let p=decodeURIComponent(u);if(p==='/')p='/index.html';
  const f=path.join(root,p);
  if(!f.startsWith(root)){res.statusCode=403;return res.end()}
- fs.readFile(f,(e,d)=>{if(e){res.statusCode=404;return res.end('Not found')}res.setHeader('Content-Type',types[path.extname(f)]||'application/octet-stream');res.setHeader('Cache-Control','no-cache');res.end(d)});
+ fs.readFile(f,(e,d)=>{if(e){res.statusCode=404;return res.end('Not found')}res.setHeader('Content-Type',types[path.extname(f)]||'application/octet-stream');res.setHeader('Cache-Control','no-cache');var __st=fs.statSync(f),__et='"'+d.length+'-'+Math.floor(__st.mtimeMs)+'"',__rq=res.req||{headers:{}};res.setHeader('ETag',__et);if(__rq.headers['if-none-match']===__et){res.statusCode=304;return res.end()}if(f.slice(-3)==='.js'||f.slice(-5)==='.html'||f.slice(-4)==='.css'){if(/gzip/.test(__rq.headers['accept-encoding']||'')){global.__gz=global.__gz||{};var __k=f+__et;if(!global.__gz[__k])global.__gz[__k]=require('zlib').gzipSync(d);res.setHeader('Content-Encoding','gzip');res.setHeader('Vary','Accept-Encoding');return res.end(global.__gz[__k])}}res.end(d)});
 }
 http.createServer((req,res)=>{
  const u=req.url.split('?')[0];
@@ -182,6 +183,7 @@ http.createServer((req,res)=>{
  req.on('end',()=>{let body={};try{body=b?JSON.parse(b):{}}catch(e){}
   try{route(req,res,u,body)}catch(e){console.error(e);J(res,{error:'Server error'},500)}});
 }).listen(4050,'127.0.0.1');
+try{require('./c360.js').jobs(()=>db,save)}catch(e){console.error(e)}
 
 
 function wrap(col,id,M,b,ok,db,str,takenUser,nextCid,uid,H,now,newInvoice,save){
@@ -207,3 +209,4 @@ function wrap(col,id,M,b,ok,db,str,takenUser,nextCid,uid,H,now,newInvoice,save){
   }
   return false;
 }
+process.on('uncaughtException',e=>console.error('uncaught:',e&&e.stack||e));process.on('unhandledRejection',e=>console.error('unhandled:',e&&e.stack||e));

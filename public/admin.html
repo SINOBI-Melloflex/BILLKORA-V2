@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BillKora - Admin</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="erp.css"></head><body>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BillKora - Admin</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="premium.css"><link rel="stylesheet" href="erp.css"><style>#v{opacity:1!important;filter:none!important}body.gld::before{content:"";position:fixed;top:0;left:0;height:3px;width:100%;background:linear-gradient(90deg,#00e5ff,#1e6bff,#19f5a6);z-index:99999;animation:gldbar 1s ease-in-out infinite}@keyframes gldbar{0%{transform:scaleX(0);transform-origin:left}100%{transform:scaleX(1);transform-origin:left}}</style></head><body>
 <div class="app"><div class="side"><div class="logo"><img src="logo.png" alt="" style="height:40px;border-radius:8px"><div>BillKora<small>ISP Admin Panel</small></div></div>
 <a data-v="dashboard" href="#dashboard"><i data-i="home"></i>Dashboard</a><a data-v="customers" href="#customers"><i data-i="users"></i>Customers</a><a data-v="requests" href="#requests"><i data-i="mail"></i>Requests</a><a data-v="packages" href="#packages"><i data-i="box"></i>Packages</a><a data-v="billing" href="#billing"><i data-i="file"></i>Billing &amp; Invoices</a><a data-v="payments" href="#payments"><i data-i="card"></i>Payments</a><a data-v="network" href="#network"><i data-i="server"></i>Network/Devices</a><a data-v="support" href="#support"><i data-i="hp"></i>Support</a><a data-v="reports" href="#reports"><i data-i="chart"></i>Reports</a><a data-v="settings" href="#settings"><i data-i="gear"></i>Settings</a>
 <a href="#" onclick="logout();return false" style="margin-top:30px"><i data-i="out"></i>Logout</a></div>
@@ -6,10 +6,10 @@
 <script src="app.js"></script>
 <script>
 var V={},D={};
-function P(t,h){$('ttl').textContent=t;$('v').innerHTML=h;icons()}
-function go(){var c=(location.hash||'#dashboard').slice(1);if(!V[c])c='dashboard';
+function P(t,h){$('ttl').textContent=t;$('v').innerHTML=h;$('v').style.opacity='';icons()}
+var __gtm;function go(){clearTimeout(__gtm);__gtm=setTimeout(goNow,40)}function goNow(){var c=(location.hash||'#dashboard').slice(1);if(!V[c])c='dashboard';window.GT=(window.GT||0)+1;var __t=window.GT,__v=document.getElementById('v');if(__v)__v.style.opacity='';document.body.classList.add('gld');
  document.querySelectorAll('.side a[data-v]').forEach(function(a){a.classList.toggle('on',a.dataset.v===c)});
- V[c]().catch(function(e){if(e.message!=='auth')toast(e.message,1)})}
+ window.GV=__t;var __p;try{__p=V[c]()}finally{window.GV=0}__p.then(function(){document.body.classList.remove('gld')},function(){document.body.classList.remove('gld')});__p.catch(function(e){if(__v)__v.style.opacity='';if(e.message!=='auth')toast(e.message,1)})}
 window.onhashchange=go;
 api('me').then(function(j){if(j.role!=='admin'){location.href='customer.html';return}$('em').textContent=j.email||'';go()});
 function pname(id){var p=(D.p||[]).filter(function(x){return x.id===id})[0];return p?p.name:'-'}
@@ -82,4 +82,4 @@ V.settings=function(){return Promise.all([api('admin/settings'),api('admin/annou
 function editA(){form('New Announcement',[{k:'title',l:'Title',r:1},{k:'text',l:'Message',t:'textarea'}],{},function(d){return api('admin/announcements','POST',d).then(done('Posted'))},'Post')}
 function delA(id){sure('Delete this announcement?',function(){A('admin/announcements/'+id,'DELETE',null,'Deleted')})}
 </script><script src="xlsx.full.min.js"></script><script src="migration.js"></script><script src="premium.js"></script>
-<script src="erp.js"></script><script src="unique.js"></script><script src="hub.js"></script><script src="support.js"></script><script src="wizard.js"></script><script src="demo.js"></script></body></html>
+<script src="erp.js"></script><script src="unique.js"></script><script src="hub.js"></script><script src="support.js"></script><script src="wizard.js"></script><script src="demo.js"></script><script src="c360.js"></script><script src="wizard2.js"></script><script src="wizard3.js"></script><script src="cwiz.js"></script><script src="upd.js"></script></body></html>

@@ -15,3 +15,14 @@ srv-out.txt
 srv-err.txt
 audit*-result.txt
 .env
+installer lab/
+update-tmp/
+update-backup-*/
+runtime/
+*.exe
+*.tmp
+*.corrupt-*
+BillKora-Start.vbs
+BillKora-Stop.vbs
+tmp-*
+analysis-*.txt

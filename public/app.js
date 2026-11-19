@@ -6,9 +6,9 @@ var money=function(n){return '\u09F3'+Number(n||0).toLocaleString('en-US')};
 var fdate=function(d){return d?String(d).slice(0,10):''};
 var cm=function(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)};
 var METHODS=[['Cash','Cash'],['bKash','bKash'],['Nagad','Nagad'],['Rocket','Rocket'],['Bank','Bank Transfer'],['Card','Card']];
-function api(u,m,b){return fetch('/api/'+u,{method:m||'GET',headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined,credentials:'same-origin'}).then(function(r){return r.json().catch(function(){return {}}).then(function(j){
+function api(u,m,b){var __g=window.GV||0;return fetch('/api/'+u,{method:m||'GET',headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined,credentials:'same-origin'}).then(function(r){return r.json().catch(function(){return {}}).then(function(j){
  if(r.status===401&&location.pathname.indexOf('login')<0&&u!=='login'){location.href='login.html';throw new Error('auth')}
- if(!r.ok)throw new Error(j.error||'Request failed');return j})})}
+ if(!r.ok)throw new Error(j.error||'Request failed');if(__g&&__g!==window.GT)return new Promise(function(){});return j})})}
 function toast(m,e){var t=document.createElement('div');t.className='toast'+(e?' er':'');t.textContent=m;document.body.appendChild(t);setTimeout(function(){t.remove()},3200)}
 function closeBox(){var o=document.querySelector('.ov');if(o)o.remove()}
 function box(t,h){closeBox();var o=document.createElement('div');o.className='ov';o.innerHTML='<div class="mb"><div class="mh"><b>'+t+'</b><span class="x" onclick="closeBox()"><i data-i="x"></i></span></div><div class="mc">'+h+'</div></div>';document.body.appendChild(o);icons()}
