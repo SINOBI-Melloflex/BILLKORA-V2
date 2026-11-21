@@ -1,0 +1,15 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BillKora - Home</title><link rel="stylesheet" href="style.css"></head><body>
+<div id="nav" data-on="home"></div>
+<div class="hero"><div><h1>Reliable Internet<br>for Your Home &amp; Business</h1><p>High-speed, stable and affordable internet connection with easy billing, anytime access and dedicated support.</p><a class="btn" href="register.html"><i data-i="wifi"></i> Get Connection</a> <a class="btn o" href="#p">View Packages</a></div><img class="ph" src="images/router.jpg" alt="Wireless router"></div>
+<div class="feat"><div><span class="ic"><i data-i="zap"></i></span><span><b>High-Speed</b>Internet</span></div><div><span class="ic"><i data-i="inf"></i></span><span><b>Unlimited</b>Data</span></div><div><span class="ic"><i data-i="shield"></i></span><span><b>Secure</b>Connection</span></div><div><span class="ic"><i data-i="hp"></i></span><span><b>24/7</b>Support</span></div></div>
+<div class="wrap" id="p"><h2 class="ttl">Our Packages</h2><div class="grid" id="pg"></div></div>
+<div class="wrap" id="contact"><h2 class="ttl">Support &amp; Contact</h2><div class="grid">
+<div class="card stat"><span class="ic"><i data-i="phone"></i></span><div><b id="cp" style="font-size:17px"></b>Call us</div></div>
+<div class="card stat"><span class="ic"><i data-i="mail"></i></span><div><b id="ce" style="font-size:17px"></b>Email</div></div>
+<div class="card stat"><span class="ic"><i data-i="pin"></i></span><div><b id="ca" style="font-size:17px"></b>Office</div></div></div></div>
+<script src="app.js"></script>
+<script>
+api('public').then(function(p){
+$('pg').innerHTML=p.packages.map(function(x){return '<div class="card pk"><h3>'+esc(x.name)+'</h3><p>'+esc(x.desc)+'</p><h2>'+money(x.price)+'<small> /mo</small></h2><a class="btn" href="register.html?p='+x.id+'">Choose</a></div>'}).join('');
+$('cp').textContent=p.phone;$('ce').textContent=p.email;$('ca').textContent=p.address});
+</script></body></html>

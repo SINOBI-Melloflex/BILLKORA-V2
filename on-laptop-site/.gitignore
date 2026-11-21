@@ -1,0 +1,17 @@
+.profile/
+backup_*/
+public_backup_*/
+data/
+logo/
+node_modules/
+*.txt
+*.log
+Thumbs.db
+BILLKORA-V2/
+backup-*/
+*.bak
+*.bak-*
+srv-out.txt
+srv-err.txt
+audit*-result.txt
+.env
