@@ -1,0 +1,1 @@
+{"name":"billkora","version":"1.0.0","main":"server.js","bin":"server.js","pkg":{"assets":["public/**/*"],"targets":["node22-win-x64"]}}

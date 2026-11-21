@@ -1,0 +1,11 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BillKora - Login</title><link rel="stylesheet" href="style.css"></head><body>
+<div id="nav" data-on="login"></div>
+<div class="reg" style="justify-content:center"><div class="lg"><div class="hd"><span class="ic"><i data-i="user"></i></span><div><h2>Admin / Customer Login</h2><p class="muted">Sign in to continue</p></div></div>
+<form id="lf"><label>Username</label><div class="in"><i data-i="user"></i><input id="un" required autofocus></div><label>Password</label><div class="in"><i data-i="key"></i><input id="pw" type="password" required></div>
+<button class="sub" style="width:100%;justify-content:center;margin-top:22px">Login</button></form>
+<p class="muted" style="margin-top:16px;text-align:center">New customer? <a href="register.html" style="color:#1e6bff;font-weight:600">Request a connection</a></p></div></div>
+<script src="app.js"></script>
+<script>
+api('me').then(function(j){location.href=j.role==='admin'?'admin.html':'customer.html'}).catch(function(){});
+$('lf').onsubmit=function(e){e.preventDefault();api('login','POST',{username:$('un').value,password:$('pw').value}).then(function(r){location.href=r.role==='admin'?'admin.html':'customer.html'}).catch(function(er){toast(er.message,1)})};
+</script></body></html>
