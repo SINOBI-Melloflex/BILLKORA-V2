@@ -1,6 +1,7 @@
 const http=require('http'),fs=require('fs'),path=require('path'),crypto=require('crypto');
 const root=path.join(__dirname,'public'),dd=path.join(__dirname,'data'),dbf=path.join(dd,'db.json');
 const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.svg':'image/svg+xml','.ico':'image/x-icon'};
+try{require('./updater.js').hook(http)}catch(e){console.error('updater: '+e.message)}
 const H=s=>crypto.createHash('sha256').update(String(s)).digest('hex');
 const now=()=>new Date().toISOString();
 const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);

@@ -2,7 +2,7 @@
 <div class="app"><div class="side"><div class="logo"><img src="logo.png" alt="" style="height:40px;border-radius:8px"><div>BillKora<small>ISP Admin Panel</small></div></div>
 <a data-v="dashboard" href="#dashboard"><i data-i="home"></i>Dashboard</a><a data-v="customers" href="#customers"><i data-i="users"></i>Customers</a><a data-v="requests" href="#requests"><i data-i="mail"></i>Requests</a><a data-v="packages" href="#packages"><i data-i="box"></i>Packages</a><a data-v="billing" href="#billing"><i data-i="file"></i>Billing &amp; Invoices</a><a data-v="payments" href="#payments"><i data-i="card"></i>Payments</a><a data-v="network" href="#network"><i data-i="server"></i>Network/Devices</a><a data-v="support" href="#support"><i data-i="hp"></i>Support</a><a data-v="reports" href="#reports"><i data-i="chart"></i>Reports</a><a data-v="settings" href="#settings"><i data-i="gear"></i>Settings</a>
 <a href="#" onclick="logout();return false" style="margin-top:30px"><i data-i="out"></i>Logout</a></div>
-<div class="main"><div class="top"><h1 id="ttl">Dashboard</h1><div class="r"><a href="#requests" title="New requests"><i data-i="bell"></i></a><div class="av">A</div><div><b>Admin User</b><div class="muted" id="em"></div></div></div></div><div id="v"></div></div></div>
+<div class="main"><div class="top"><h1 id="ttl">Dashboard</h1><div class="r"><button id="bkUpd" type="button" style="margin-right:12px;padding:8px 14px;border:0;border-radius:10px;cursor:pointer;font-weight:600;color:#fff;background:linear-gradient(90deg,#1e6bff,#8b5cf6)">&#8635; Check for update</button><a href="#requests" title="New requests"><i data-i="bell"></i></a><div class="av">A</div><div><b>Admin User</b><div class="muted" id="em"></div></div></div></div><div id="v"></div></div></div>
 <script src="app.js"></script>
 <script>
 var V={},D={};
@@ -82,4 +82,30 @@ V.settings=function(){return Promise.all([api('admin/settings'),api('admin/annou
 function editA(){form('New Announcement',[{k:'title',l:'Title',r:1},{k:'text',l:'Message',t:'textarea'}],{},function(d){return api('admin/announcements','POST',d).then(done('Posted'))},'Post')}
 function delA(id){sure('Delete this announcement?',function(){A('admin/announcements/'+id,'DELETE',null,'Deleted')})}
 </script><script src="xlsx.full.min.js"></script><script src="migration.js"></script><script src="premium.js"></script>
-<script src="erp.js"></script><script src="unique.js"></script><script src="hub.js"></script><script src="support.js"></script><script src="wizard.js"></script><script src="demo.js"></script><script src="c360.js"></script><script src="wizard2.js"></script><script src="wizard3.js"></script><script src="cwiz.js"></script><script src="upd.js"></script></body></html>
+<script src="erp.js"></script><script src="unique.js"></script><script src="hub.js"></script><script src="support.js"></script><script src="wizard.js"></script><script src="demo.js"></script><script src="c360.js"></script><script src="wizard2.js"></script><script src="wizard3.js"></script><script src="cwiz.js"></script><script src="upd.js"></script><script>
+(function(){
+var b=document.getElementById('bkUpd');if(!b)return;
+function say(t){alert(t)}
+function wait(n){
+  fetch('/api/me',{cache:'no-store'}).then(function(r){if(r.status<500){location.reload()}else{throw 0}}).catch(function(){
+    if(n>0){setTimeout(function(){wait(n-1)},1500)}else{say('Update installed. Please close and reopen BillKora.')}
+  });
+}
+b.onclick=function(){
+  b.disabled=true;var old=b.innerHTML;b.textContent='Checking...';
+  fetch('/api/update/check',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){
+    if(j.error)throw new Error(j.error);
+    if(!j.available){say('You already have the latest version ('+j.current+').');return}
+    if(!confirm('Update available: '+j.current+' -> '+j.latest+'\n\n'+(j.notes||'')+'\n\nYour customers, invoices and settings will be kept. Install now?'))return;
+    var pw=prompt('Enter your admin password to confirm the update:');
+    if(pw===null||pw==='')return;
+    b.textContent='Updating...';
+    return fetch('/api/update/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})}).then(function(r){return r.json()}).then(function(k){
+      if(!k.ok)throw new Error(k.error||'Update failed');
+      say('Updated to '+k.version+'. BillKora is restarting. You will need to sign in again.');
+      setTimeout(function(){wait(30)},2500);
+    });
+  }).catch(function(e){say('Update problem: '+e.message)}).then(function(){b.disabled=false;b.innerHTML=old});
+};
+})();
+</script></body></html>

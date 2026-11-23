@@ -25,3 +25,9 @@ Windows launcher: BillKora.ps1 (needs Microsoft Edge). launch.vbs has the folder
 3. Choose an install folder, keep or change the default login (**admin / admin**), and click **Install**.
 
 Requires Windows 10 or 11 and an internet connection during setup. Setup downloads everything else it needs automatically.
+
+## Updating
+
+Inside BillKora (admin panel, top bar) click **Check for update**. If a new version is on GitHub it downloads and installs itself. Your customers, invoices and settings are kept.
+
+Or just download the newest installer again and run it. It replaces the old app and keeps your data.
