@@ -22,6 +22,6 @@ Windows launcher: BillKora.ps1 (needs Microsoft Edge). launch.vbs has the folder
 
 1. Download and double-click `BillKora-Setup.exe`.
 2. If Windows shows "Windows protected your PC", click **More info**, then **Run anyway**.
-3. Choose an install folder, create your admin account, and click **Install**.
+3. Choose an install folder, keep or change the default login (**admin / admin**), and click **Install**.
 
 Requires Windows 10 or 11 and an internet connection during setup. Setup downloads everything else it needs automatically.
