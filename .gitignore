@@ -26,3 +26,5 @@ BillKora-Start.vbs
 BillKora-Stop.vbs
 tmp-*
 analysis-*.txt
+
+for customer/
