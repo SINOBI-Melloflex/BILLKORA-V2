@@ -2,7 +2,7 @@
 (function(){
 var $$=function(i){return document.getElementById(i)};
 var S={st:'upload',rows:[],pkk:[],pk:{},zones:{},fname:'',bad:0,pi:0,rq:0,rv:{ip:'',user:'',pass:''},devId:'',exist:null,cat:null,res:null,running:false,others:[],log:[],pct:0};
-var STEPS=['File','Prices','Router','Sync','Import','Done'];
+var STEPS=['File','Prices','Router','Sync','Import','Done'];var STEPSD=['Router','Prices','Import','Done'];var IDXD={upload:0,scan:1,prices:1,router:2,conn:2,other:2,sync:2,run:2,done:3};
 var IDX={upload:0,scan:0,prices:1,router:2,conn:2,other:2,sync:3,run:4,done:5};
 var css='.x3{position:relative;overflow:hidden;border-radius:20px;padding:22px;background:radial-gradient(1200px 500px at 10% -10%,#102a5c 0,transparent 60%),#050a18;color:#d7e6ff;min-height:520px;border:1px solid #16305f;box-shadow:0 0 40px rgba(0,229,255,.08) inset}'
 +'.x3g{position:absolute;inset:0;background-image:linear-gradient(rgba(0,229,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.06) 1px,transparent 1px);background-size:36px 36px;animation:x3gm 14s linear infinite;pointer-events:none}@keyframes x3gm{to{background-position:36px 36px}}'
@@ -36,8 +36,8 @@ function typeAll(){var els=document.querySelectorAll('#x3m [data-t]');
   if(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches){el.textContent=t;return}
   el.textContent='';el.classList.add('cur');
   var iv=setInterval(function(){i+=2;el.textContent=t.slice(0,i);if(i>=t.length){clearInterval(iv);el.classList.remove('cur')}},16)})}
-function shell(inner){var i=IDX[S.st]||0;
- var steps=STEPS.map(function(n,k){return '<div class="x3s'+(k<i?' d':'')+(k===i?' on':'')+'"><i>'+(k<i?'&#10003;':(k+1))+'</i><b>'+n+'</b></div>'}).join('<u></u>');
+function shell(inner){var i=(S.direct?IDXD:IDX)[S.st]||0;
+ var steps=(S.direct?STEPSD:STEPS).map(function(n,k){return '<div class="x3s'+(k<i?' d':'')+(k===i?' on':'')+'"><i>'+(k<i?'&#10003;':(k+1))+'</i><b>'+n+'</b></div>'}).join('<u></u>');
  P('Migration Assistant','<div id="wzbar" style="display:none"></div><div class="x3"><div class="x3g"></div><div class="x3steps">'+steps+'</div><div class="x3main" id="x3m">'+inner+'</div></div>');
  typeAll()}
 function ci(i,s,t){var e=$$('ci'+i);if(!e)return;e.className='x3ci '+s;if(t)e.querySelector('span').textContent=t}
@@ -45,7 +45,7 @@ function checklist(items){return '<div class="x3chk">'+items.map(function(t,i){r
 function count(id,to){var n=0,step=Math.max(1,Math.ceil(to/30));var iv=setInterval(function(){n=Math.min(to,n+step);var e=$$(id);if(!e){clearInterval(iv);return}e.textContent=n;if(n>=to)clearInterval(iv)},50)}
 
 /* ---------- 1. upload ---------- */
-function vUpload(){S.st='upload';
+function vUpload(){S.st='upload';S.direct=false;
  shell(say("Hi, I'm your migration assistant. Give me your customer file and I will read everything myself: users, packages, zones and prices. You only need to answer a few short questions.")
  +'<div class="x3drop" id="x3drop"><div class="x3pl"></div><b>Drop your Excel / CSV file here</b><span>or</span><div class="x3row"><button class="x3b" onclick="x3Pick()">Choose file</button><button class="x3b g" onclick="x3Demo()">Download demo file</button></div><input id="x3f" type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="x3File(this.files[0])"></div>');
  var d=$$('x3drop');if(!d)return;
@@ -56,7 +56,7 @@ window.x3Demo=function(){if(typeof wzDemo==='function')wzDemo();else toast('Demo
 var COLS={name:['customername','fullname','name','customer'],phone:['phone','mobile'],user:['pppoeusername','username','login','pppoe'],pass:['pppoepassword','password','pass'],pkg:['package','profile','plan'],bill:['monthlybill','bill','price','amount'],due:['previousdue','due'],sub:['subzone'],zone:['zone','area'],addr:['address'],ip:['ipaddress','ip'],mac:['macaddress','mac']};
 var ORDER=['user','pass','name','phone','pkg','bill','due','sub','zone','addr','ip','mac'];
 var LAB={name:'Customer name',phone:'Phone',user:'PPPoE username',pkg:'Package'};
-window.x3File=function(f){
+window.x3File=function(f){var dn=S._dn;S._dn=0;
  if(!f)return;
  if(typeof XLSX==='undefined'){toast('Excel reader (xlsx.full.min.js) is missing',1);return}
  var csv=/\.csv$/i.test(f.name),r=new FileReader();
@@ -78,7 +78,7 @@ window.x3File=function(f){
    seen[u.toLowerCase()]=1;if(/^1[3-9]\d{8}$/.test(ph))ph='0'+ph;
    rows.push({name:g(r,'name')||u,phone:ph,user:u,pass:g(r,'pass'),pkg:p,bill:Number(g(r,'bill'))||0,zone:g(r,'zone'),sub:g(r,'sub'),addr:g(r,'addr'),ip:g(r,'ip'),mac:g(r,'mac')})});
   if(!rows.length){toast('No usable rows (each needs a PPPoE username and a package)',1);return}
-  S.rows=rows;S.bad=bad;S.fname=f.name;S.pk={};S.pkk=[];S.zones={};S.cat=null;S.res=null;S.others=[];
+  S.direct=!!dn;S.rows=rows;S.bad=bad;S.fname=f.name;S.pk={};S.pkk=[];S.zones={};S.cat=null;S.res=null;S.others=[];
   var cnt={};
   rows.forEach(function(x){
    if(!S.pk[x.pkg]){S.pk[x.pkg]={n:0,price:'',speed:spd(x.pkg),profile:'',pool:''};S.pkk.push(x.pkg);cnt[x.pkg]={}}
@@ -94,16 +94,46 @@ function vScan(){S.st='scan';
  count('c1',S.rows.length);count('c2',S.pkk.length);count('c3',Object.keys(S.zones).length);
  setTimeout(function(){if(S.st==='scan')afterScan()},2400)}
 function nextMissing(){for(var i=0;i<S.pkk.length;i++){if(!(Number(S.pk[S.pkk[i]].price)>0))return i}return -1}
-function afterScan(){S.pi=nextMissing();if(S.pi<0)vRouter();else vPrice()}
+function afterScan(){S.pi=nextMissing();if(S.pi<0)nextAfterPrices();else vPrice()}
 
 /* ---------- 2. prices ---------- */
 function vPrice(){S.st='prices';var k=S.pkk[S.pi],c=S.pk[k],left=S.pkk.filter(function(x){return !(Number(S.pk[x].price)>0)}).length;
- shell(say('I could not find a monthly bill for '+k+' in your file. How much do you charge for it per month? ('+c.n+' users are on this package)')
+ shell(say('I could not find a monthly bill for '+k+(S.direct?' on your router. How much do you charge for it per month? (':' in your file. How much do you charge for it per month? (')+c.n+' users are on this package)')
  +'<div class="x3q"><div class="x3in"><span>&#2547;</span><input id="x3i" type="number" min="1" placeholder="e.g. 500" onkeydown="if(event.key===\'Enter\')x3Price()"></div><small>'+left+' package(s) still need a price</small><div class="x3row"><button class="x3b" onclick="x3Price()">Continue</button></div></div>');
  var i=$$('x3i');if(i)i.focus()}
 window.x3Price=function(){var v=Number($$('x3i').value);if(!(v>0)){toast('Enter the monthly bill',1);return}
- S.pk[S.pkk[S.pi]].price=v;S.pi=nextMissing();if(S.pi<0)vRouter();else vPrice()};
+ S.pk[S.pkk[S.pi]].price=v;S.pi=nextMissing();if(S.pi<0)nextAfterPrices();else vPrice()};
 
+/* ---------- direct MikroTik import: router already read, so skip router and sync steps ---------- */
+window.x3Direct=function(f,rt){S._dn=1;S.rt0=rt||{};window.x3File(f)};
+function nextAfterPrices(){if(S.direct)vDirectPrep();else vRouter()}
+window.x3DPrep=function(){vDirectPrep()};
+async function vDirectPrep(){S.st='sync';
+ shell(say('Getting everything ready from your router. I only read, I never change anything there.')+checklist(['Saving your router','Reading IP pools and profiles','Matching packages with profiles'])+'<div class="x3res" id="x3r"></div>');
+ try{
+  ci(0,'run');
+  var L=await api('admin/netdevices');L=Array.isArray(L)?L:[];
+  var rt=S.rt0||{},d=L.filter(function(x){return x.kind==='MikroTik'&&(x.method||'api')==='api'})[0];
+  S.exist=d||null;
+  if(rt.mode==='saved'){
+   if(!d)throw new Error('No saved MikroTik router found');
+   S.devId=d.id;S.rt={ip:d.ip,port:d.port||'8728',user:d.user||'',name:d.name||''}}
+  else{
+   var body={name:(d&&d.name)||('MikroTik '+rt.ip),kind:'MikroTik',method:'api',ip:rt.ip,port:rt.port||'8728',user:rt.user,pass:rt.pass,note:'Added by migration assistant'};
+   if(d){await api('admin/netdevices/'+d.id,'PUT',body);S.devId=d.id}
+   else{var r0=await api('admin/netdevices','POST',body);S.devId=r0.id;S.exist={id:S.devId}}
+   S.rt={ip:rt.ip,port:rt.port||'8728',user:rt.user,name:body.name}}
+  ci(0,'ok');ci(1,'run');
+  var c=await api('admin/mtcat');
+  if(!c.ok)throw new Error(c.msg||'Router not reachable');
+  ci(1,'ok');ci(2,'run');S.cat=c;
+  S.pkk.forEach(function(k){var cc=S.pk[k];if(!cc.profile){var p=(c.profiles||[]).filter(function(x){return x.name===k})[0];if(p){cc.profile=p.name;cc.pool=p.pool}}});
+  autoMap();
+  ci(2,'ok');await sleep(500);
+  S.rt0=null;
+  var un=S.pkk.filter(function(k){return !S.pk[k].profile}).length;
+  if(un)vMatch();else{S.log=[];S.pct=0;vRun()}
+ }catch(e){if(e.message==='auth')return;ci(0,'err');var r=$$('x3r');if(r)r.innerHTML=failBox(e.message,'<button class="x3b" onclick="x3DPrep()">Try again</button>')}}
 /* ---------- 3. router and devices (x3v4) ---------- */
 var SVC=[
  ['api','MikroTik API','8728','The service BillKora uses to control PPPoE users on MikroTik. Needed for the router.'],

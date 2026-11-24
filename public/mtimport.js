@@ -187,7 +187,7 @@ function startRead(my){
   XLSX.utils.book_append_sheet(wb,ws,'MikroTik');
   var arr=XLSX.write(wb,{bookType:'xlsx',type:'array'});
   var file=new File([arr],'mikrotik-import.xlsx',{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-  D.pass='';D.admin='';
+  var rt={mode:D.mode,ip:D.ip||'',port:D.port||'8728',user:D.user||'',pass:D.pass||''};D.pass='';D.admin='';
   items.forEach(function(d){d.className='d'});
   setTimeout(function(){
    if(my!==RID)return;
@@ -196,7 +196,7 @@ function startRead(my){
    typeInto(bb,t,function(){
     if(my!==RID)return;
     ctl.innerHTML='';
-    ctl.appendChild(btn('Continue to prices  \u2192',function(){closeBox();window.x3File(file)}));
+    ctl.appendChild(btn('Continue to prices  \u2192',function(){closeBox();window.x3Direct(file,rt)}));
     showCtl();
    });
   },500);
@@ -218,7 +218,7 @@ function closeBox(){
 }
 function openBox(){
  if(OV)return;
- if(typeof XLSX==='undefined'||typeof window.x3File!=='function'){msg('The migration assistant is not ready. Reload the page and try again.',1);return}
+ if(typeof XLSX==='undefined'||typeof window.x3Direct!=='function'){msg('The migration assistant is not ready. Reload the page and try again.',1);return}
  if(!document.getElementById('mtiCss')){var s=document.createElement('style');s.id='mtiCss';s.textContent=CSS;document.head.appendChild(s)}
  D={};setPath();
  OV=el('div','mti-ov');
