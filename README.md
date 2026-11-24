@@ -11,7 +11,7 @@ ISP billing and customer management app (Node.js, no extra packages).
 
 ## Demo logins
 - Admin: admin / admin
-- Customer: user / user
+(There is no demo customer. Add customers inside the app.)
 
 Data is saved in data/db.json (created automatically on first start).
 

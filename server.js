@@ -24,7 +24,11 @@ function seed(){
   invoices:[],payments:[],tickets:[],
   devices:[{id:'d1',customerId:'c1',type:'ONU / Router',ip:'10.10.1.25',mac:'AA:BB:CC:11:22:33',status:'online'}],
   announcements:[{id:'a1',title:'Scheduled Maintenance',text:'Our network will be under maintenance on Nov 20, 2026 (12:00 AM - 4:00 AM).',date:now()}]};
- inv(mkey(2),'paid');inv(mkey(1),'paid');inv(mkey(0),'due');
+ db.packages=[];db.customers=[];db.requests=[];db.invoices=[];db.payments=[];db.tickets=[];db.devices=[];db.announcements=[];
+try{const sf=path.join(dd,'_setup.json'),su=JSON.parse(fs.readFileSync(sf,'utf8').replace(/^\uFEFF/,''));
+if(su.company)db.settings.company=String(su.company).slice(0,80);
+if(su.user&&su.pass){db.settings.admin={user:String(su.user).slice(0,40),pass:H(String(su.pass))}}
+try{fs.unlinkSync(sf)}catch(e3){}}catch(e){}
 }
 try{db=JSON.parse(fs.readFileSync(dbf,'utf8'))}catch(e){try{if(fs.existsSync(dbf)&&fs.statSync(dbf).size>2)fs.copyFileSync(dbf,dbf+'.corrupt-'+Date.now())}catch(x){}seed();try{JSON.parse(fs.readFileSync(path.join(dd,'requests.json'),'utf8')).forEach(r=>db.requests.push(Object.assign({id:uid('r'),status:'pending'},r)))}catch(e2){}save()}
 const pub=c=>{const o=Object.assign({},c);delete o.pass;return o};

@@ -1,3 +1,24 @@
+const https=require('https');
+const fetch=async(u,o)=>{
+ let last=null;
+ for(let a=0;a<3;a++){
+  try{
+   return await new Promise((res,rej)=>{
+    const go=(url,hops)=>{
+     const q=https.get(url,{headers:{'User-Agent':'BillKora-Updater'},family:a===1?4:0},r=>{
+      if(r.statusCode>=300&&r.statusCode<400&&r.headers.location){r.resume();if(hops>6)return rej(new Error('Too many redirects'));return go(new URL(r.headers.location,url).toString(),hops+1)}
+      const c=[];r.on('data',d=>c.push(d));r.on('error',rej);
+      r.on('end',()=>{const b=Buffer.concat(c);res({ok:r.statusCode===200,status:r.statusCode,json:async()=>JSON.parse(b.toString('utf8')),arrayBuffer:async()=>b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength)})});
+     });
+     q.setTimeout(String(u).indexOf('/archive/')>=0?180000:30000,()=>q.destroy(new Error('Connection timed out')));
+     q.on('error',rej);
+    };
+    go(String(u),0);
+   });
+  }catch(e){last=e;await new Promise(r=>setTimeout(r,1500))}
+ }
+ throw new Error('Could not reach GitHub ('+((last&&(last.code||last.message))||'unknown')+'). Check the internet connection of this computer.');
+};
 const fs=require('fs'),path=require('path'),cp=require('child_process'),zlib=require('zlib');
 const ROOT=__dirname,REPO='SINOBI-Melloflex/BILLKORA-V2',BR='main';
 const RAW='https://raw.githubusercontent.com/'+REPO+'/'+BR+'/package.json';
