@@ -14,7 +14,6 @@ ISP billing and customer management app (Node.js, no extra packages).
 - Customer: user / user
 
 Data is saved in data/db.json (created automatically on first start).
-Windows launcher: BillKora.ps1 (needs Microsoft Edge). launch.vbs has the folder path G:\billkora inside it - edit it if you put the project somewhere else.
 
 ## Download for Windows
 
